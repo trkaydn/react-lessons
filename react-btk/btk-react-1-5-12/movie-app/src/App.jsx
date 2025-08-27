@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import StarRating from "./StarRating";
+import useMovies from "./hooks/useMovies";
+import useMovieDetails from "./hooks/useMovieDetails";
 
 const getAverage = (array) =>
   array.reduce((sum, value) => sum + value / array.length, 0);
@@ -7,12 +9,21 @@ const getAverage = (array) =>
 const apiKey = "1382ce27ee4745ac3ddaef2cfa418452";
 
 export default function App() {
-  const [query, setQuery] = useState("fast");
-  const [movies, setMovies] = useState([]);
+  const [query, setQuery] = useState("father");
   const [selectedMovies, setSelectedMovies] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [selectedMovie, setSelectedMovie] = useState(null);
+
+
+  const {
+    movies,
+    loading,
+    error,
+    currentPage,
+    totalPages,
+    total_results,
+    nextPage,
+    previousPage,
+  } = useMovies(query);
 
   function handleSelectMovie(id) {
     setSelectedMovie(selectedMovie => id == selectedMovie ? null : id);
@@ -32,77 +43,66 @@ export default function App() {
     handleUnselectMovie();
   }
 
-  //useEffect runs at first render
-  //useEffect runs when query changes
-  useEffect(function () {
-    async function getMovies() {
-      try {
-
-        if (query.length < 4) {
-          setMovies([]);
-          setError("");
-          return;
-        }
-
-        setLoading(true);
-        setError("");
-        const response = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${query}`);
-
-        if (!response.ok) {
-
-        }
-
-        const data = await response.json();
-
-        if (data.results.length === 0) {
-          setError("No movies found");
-        }
-
-        setMovies(data.results);
-      }
-      catch (error) {
-        setError(error);
-      }
-      finally {
-        setLoading(false);
-      }
-    }
-
-    getMovies();
-  }, [query]);
-
   return (
     <>
       <Nav>
         <Logo />
         <Search query={query} setQuery={setQuery} />
-        <NavSearchResults movies={movies} />
+        <NavSearchResults totalResults={total_results} />
       </Nav>
       <Main>
         <div className="row mt-2">
           <div className="col-md-9">
             <ListContainer>
               {loading && <Loading />}
-              {!loading && !error && <MovieList movies={movies} onSelectMovie={handleSelectMovie} selectedMovie={selectedMovie} />}
+              {!loading && !error &&
+                <>
+                  {movies.length > 0 &&
+                    <>
+                      <MovieList movies={movies} onSelectMovie={handleSelectMovie} selectedMovie={selectedMovie} />
+                      <Pagination nextPage={nextPage} previousPage={previousPage} currentPage={currentPage} totalPages={totalPages} />
+                    </>
+                  }
+                </>
+              }
               {error && <ErrorMessage message={error} />}
             </ListContainer>
           </div>
           <div className="col-md-3">
             <ListContainer>
 
-              {selectedMovie ?  
-              <MovieDetails selectedMovie={selectedMovie} unSelectMovie={handleUnselectMovie} onAddToList={handleAddToList} selectedMovies={selectedMovies} /> : 
-              ( <>
-                <MyListSummary selectedMovies={selectedMovies} />
-                <MyMovieList selectedMovies={selectedMovies} handleDeleteFromList={handleDeleteFromList} />
+              {selectedMovie ?
+                <MovieDetails selectedMovie={selectedMovie} unSelectMovie={handleUnselectMovie} onAddToList={handleAddToList} selectedMovies={selectedMovies} /> :
+                (<>
+                  <MyListSummary selectedMovies={selectedMovies} />
+                  <MyMovieList selectedMovies={selectedMovies} handleDeleteFromList={handleDeleteFromList} />
                 </>
-              )
+                )
               }
             </ListContainer>
           </div>
         </div>
       </Main>
     </>
+  );
+}
+
+function Pagination({ nextPage, previousPage, currentPage, totalPages }) {
+  return (
+    <nav>
+      <ul className="pagination d-flex justify-content-between">
+        <li className="page-item">
+          <button className="page-link" onClick={previousPage} disabled={currentPage === 1}>
+            Önceki
+          </button>
+        </li>
+        <li className="page-item">
+          <button className="page-link" onClick={nextPage} disabled={currentPage === totalPages}>
+            Sonraki
+          </button>
+        </li>
+      </ul>
+    </nav>
   );
 }
 
@@ -149,10 +149,10 @@ function Search({ query, setQuery }) {
   );
 }
 
-function NavSearchResults({ movies }) {
+function NavSearchResults({ totalResults }) {
   return (
     <div className="col-4 text-end">
-      <strong>{movies.length}</strong> kayıt bulundu.
+      <strong>{totalResults}</strong> kayıt bulundu.
     </div>
   );
 }
@@ -191,9 +191,8 @@ function MovieList({ movies, onSelectMovie, selectedMovie }) {
 }
 
 function MovieDetails({ selectedMovie, unSelectMovie, onAddToList, selectedMovies }) {
-  const [movie, setMovie] = useState({});
-  const [loading, setLoading] = useState(false);
   const [userRating, setUserRating] = useState(null);
+  const { movie, loading } = useMovieDetails(selectedMovie);
 
   function handleAddToList() {
     const newMovie = {
@@ -202,26 +201,6 @@ function MovieDetails({ selectedMovie, unSelectMovie, onAddToList, selectedMovie
     };
     onAddToList(newMovie);
   }
-
-  useEffect(function () {
-    async function getMovieDetails() {
-      if (!selectedMovie) return;
-
-      try {
-        setLoading(true);
-        const response = await fetch(`https://api.themoviedb.org/3/movie/${selectedMovie}?api_key=${apiKey}`);
-        setMovie(await response.json());
-      }
-      catch (error) {
-        console.error(error);
-      }
-      finally {
-        setLoading(false);
-      }
-    }
-
-    getMovieDetails();
-  }, [selectedMovie]);
 
   return (
     <>
@@ -323,7 +302,7 @@ function MyListMovie({ movie, handleDeleteFromList }) {
     <div className="card mb-2">
       <div className="row">
         <div className="col-4">
-            <img width="222" height="333" src={movie.poster_path ? `https://media.themoviedb.org/t/p/w440_and_h660_face/${movie.poster_path}` : '/img/no-image.jpg'} alt={movie.Title} className="img-fluid rounded-start" />
+          <img width="222" height="333" src={movie.poster_path ? `https://media.themoviedb.org/t/p/w440_and_h660_face/${movie.poster_path}` : '/img/no-image.jpg'} alt={movie.Title} className="img-fluid rounded-start" />
         </div>
         <div className="col-8">
           <div className="card-body">
