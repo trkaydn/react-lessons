@@ -1,29 +1,25 @@
-import { useEffect, useState } from "react";
-import StarRating from "./StarRating";
+import { useState } from "react";
 import useMovies from "./hooks/useMovies";
-import useMovieDetails from "./hooks/useMovieDetails";
-
-const getAverage = (array) =>
-  array.reduce((sum, value) => sum + value / array.length, 0);
-
-const apiKey = "1382ce27ee4745ac3ddaef2cfa418452";
+import useLocalStorage from "./hooks/useLocalStorage";
+import Pagination from "./components/Pagination";
+import ErrorMessage from "./components/ErrorMessage";
+import Loading from "./components/Loading";
+import Nav from "./components/navbar/Nav";
+import Logo from "./components/navbar/Logo";
+import Search from "./components/navbar/Search";
+import NavSearchResults from "./components/navbar/NavSearchResults";
+import Main from "./components/Main";
+import ListContainer from "./components/ListContainer";
+import MovieList from "./components/movies/MovieList";
+import MovieDetails from "./components/movies/MovieDetails";
+import MyListSummary from "./components/selectedMovies/MyListSummary";
+import MyMovieList from "./components/selectedMovies/MyMovieList";
 
 export default function App() {
   const [query, setQuery] = useState("father");
-  const [selectedMovies, setSelectedMovies] = useState([]);
+  const [selectedMovies, setSelectedMovies] = useLocalStorage([], "selectedMovies");
   const [selectedMovie, setSelectedMovie] = useState(null);
-
-
-  const {
-    movies,
-    loading,
-    error,
-    currentPage,
-    totalPages,
-    total_results,
-    nextPage,
-    previousPage,
-  } = useMovies(query);
+  const { movies, loading, error, currentPage, totalPages, total_results, nextPage, previousPage } = useMovies(query);
 
   function handleSelectMovie(id) {
     setSelectedMovie(selectedMovie => id == selectedMovie ? null : id);
@@ -84,245 +80,5 @@ export default function App() {
         </div>
       </Main>
     </>
-  );
-}
-
-function Pagination({ nextPage, previousPage, currentPage, totalPages }) {
-  return (
-    <nav>
-      <ul className="pagination d-flex justify-content-between">
-        <li className="page-item">
-          <button className="page-link" onClick={previousPage} disabled={currentPage === 1}>
-            Önceki
-          </button>
-        </li>
-        <li className="page-item">
-          <button className="page-link" onClick={nextPage} disabled={currentPage === totalPages}>
-            Sonraki
-          </button>
-        </li>
-      </ul>
-    </nav>
-  );
-}
-
-function ErrorMessage({ message }) {
-  return (
-    <div className="alert alert-danger" role="alert">
-      {message}
-    </div>
-  );
-}
-
-function Loading() {
-  return (
-    <div className="spinner-border text-primary" role="status">
-      <span className="sr-only"></span>
-    </div>
-  );
-}
-
-function Nav({ children }) {
-  return (
-    <nav className="bg-primary text-white p-2">
-      <div className="container">
-        <div className="row align-items-center">{children}</div>
-      </div>
-    </nav>
-  );
-}
-
-function Logo() {
-  return (
-    <div className="col-4">
-      <i className="bi bi-camera-reels me-2"></i>
-      Movie App
-    </div>
-  );
-}
-
-function Search({ query, setQuery }) {
-  return (
-    <div className="col-4">
-      <input type="text" className="form-control" placeholder="Film ara..." value={query} onChange={(e) => setQuery(e.target.value)} />
-    </div>
-  );
-}
-
-function NavSearchResults({ totalResults }) {
-  return (
-    <div className="col-4 text-end">
-      <strong>{totalResults}</strong> kayıt bulundu.
-    </div>
-  );
-}
-
-function Main({ children }) {
-  return <main className="container">{children}</main>;
-}
-
-function ListContainer({ children }) {
-  const [isOpen, setIsOpen] = useState(true);
-  return (
-    <div className="movie-list">
-      <button
-        className="btn btn-sm btn-outline-primary mb-2"
-        onClick={() => setIsOpen((val) => !val)}
-      >
-        {isOpen ? (
-          <i className="bi bi-chevron-up"></i>
-        ) : (
-          <i className="bi bi-chevron-down"></i>
-        )}
-      </button>
-      {isOpen && children}
-    </div>
-  );
-}
-
-function MovieList({ movies, onSelectMovie, selectedMovie }) {
-  return (
-    <div className="row row-cols-1 row-cols-md-3 row-cols-xl-4 g-4">
-      {movies.map((movie) => (
-        <Movie movie={movie} key={movie.id} onSelectMovie={onSelectMovie} selectedMovie={selectedMovie} />
-      ))}
-    </div>
-  );
-}
-
-function MovieDetails({ selectedMovie, unSelectMovie, onAddToList, selectedMovies }) {
-  const [userRating, setUserRating] = useState(null);
-  const { movie, loading } = useMovieDetails(selectedMovie);
-
-  function handleAddToList() {
-    const newMovie = {
-      ...movie,
-      userRating
-    };
-    onAddToList(newMovie);
-  }
-
-  return (
-    <>
-      {loading ? <Loading /> :
-        <div className="border p-2 mb-3">
-          <div className="row">
-            <div className="col-4">
-              <img width="222" height="333" src={movie.poster_path ? `https://media.themoviedb.org/t/p/w440_and_h660_face/${movie.poster_path}` : '/img/no-image.jpg'} alt={movie.Title} className="img-fluid rounded" />
-            </div>
-            <div className="col-8">
-              <h5>{movie.title}</h5>
-              <p>
-                <i className="bi bi-calendar2-date me-1"></i>
-                <span>{movie.release_date}</span>
-              </p>
-              <p>
-                <i className="bi bi-star-fill text-warning me-1"></i>
-                <span>{movie.vote_average?.toFixed(2)}</span>
-              </p>
-            </div>
-            <div className="col-12 border-top p-3 mt-3">
-              <p>{movie.overview}</p>
-              <p>{movie.genres?.map((genre) => (
-                <span className="badge text-bg-primary me-1" key={genre.id}>{genre.name}</span>
-              ))}</p>
-            </div>
-          </div>
-          {(!selectedMovies.find(m => m.id === movie.id)) ? (
-            <>
-              <div className="mb-4">
-                <StarRating maxRating={10} size={20} onRating={setUserRating} />
-              </div>
-              <button className="btn btn-sm btn-primary me-1" onClick={() => handleAddToList(movie)}>
-                Listeye Ekle
-              </button>
-            </>
-          ) : <p>Listeye Eklendi. Verilen Puan: {selectedMovies.find(m => m.id === movie.id)?.userRating ?? "-"} <i className="bi bi-stars text-warning me-1"></i></p>}
-          <button className="btn btn-sm btn-outline-secondary" onClick={unSelectMovie}>
-            Kapat
-          </button>
-        </div>
-      }
-    </>
-  );
-}
-
-function Movie({ movie, onSelectMovie, selectedMovie }) {
-  return (
-    <div className="col mb-2">
-      <div className={`card movie ${selectedMovie === movie.id && 'selected-movie'}`} onClick={() => onSelectMovie(movie.id)}>
-        <img width="222" height="333" src={movie.poster_path ? `https://media.themoviedb.org/t/p/w440_and_h660_face/${movie.poster_path}` : '/img/no-image.jpg'} alt={movie.title} className="card-img-top" />
-        <div className="card-body">
-          <h6 className="card-title">{movie.title}</h6>
-          <div>
-            <i className="bi bi-calendar2-date me-1"></i>
-            <span>{movie.release_date}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MyListSummary({ selectedMovies }) {
-  const avgRating = getAverage(selectedMovies.map((m) => m.vote_average));
-  const avgUserRating = getAverage(selectedMovies.map((m) => m.userRating || 0));
-  const avgDuration = getAverage(selectedMovies.map((m) => m.runtime));
-  return (
-    <div className="card mb-2">
-      <div className="card-body">
-        <h5>Listeye [{selectedMovies.length}] film eklendi.</h5>
-        <div className="d-flex justify-content-between">
-          <p>
-            <i className="bi bi-star-fill text-warning me-1"></i>
-            <span>{avgRating.toFixed(2)}</span>
-          </p>
-          <p>
-            <i className="bi bi-stars text-warning me-1"></i>
-            <span>{avgUserRating.toFixed(2)}</span>
-          </p>
-          <p>
-            <i className="bi bi-hourglass-split text-warning me-1"></i>
-            <span>{avgDuration.toFixed(2)} dk</span>
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MyMovieList({ selectedMovies, handleDeleteFromList }) {
-  return selectedMovies.map((movie) => (
-    <MyListMovie movie={movie} key={movie.id} handleDeleteFromList={handleDeleteFromList} />
-  ));
-}
-
-function MyListMovie({ movie, handleDeleteFromList }) {
-  return (
-    <div className="card mb-2">
-      <div className="row">
-        <div className="col-4">
-          <img width="222" height="333" src={movie.poster_path ? `https://media.themoviedb.org/t/p/w440_and_h660_face/${movie.poster_path}` : '/img/no-image.jpg'} alt={movie.Title} className="img-fluid rounded-start" />
-        </div>
-        <div className="col-8">
-          <div className="card-body">
-            <h6 className="card-title">{movie.title}</h6>
-            <div className="d-flex justify-content-between">
-              <p>
-                <i className="bi bi-star-fill text-warning me-1"></i>
-                <span>{movie.vote_average?.toFixed(2)}</span>
-              </p>
-              <p>
-                <i className="bi bi-hourglass text-warning me-1"></i>
-                <span>{movie.runtime} dk</span>
-              </p>
-            </div>
-            <button className="btn btn-sm btn-danger" onClick={() => handleDeleteFromList(movie.id)}>
-              Listeden Kaldır
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
