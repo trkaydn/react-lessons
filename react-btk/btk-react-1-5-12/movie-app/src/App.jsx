@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import StarRating from "./StarRating";
 
 const getAverage = (array) =>
   array.reduce((sum, value) => sum + value / array.length, 0);
@@ -19,6 +20,16 @@ export default function App() {
 
   function handleUnselectMovie() {
     setSelectedMovie(null);
+  }
+
+  function handleAddToList(movie) {
+    setSelectedMovies(selectedMovies => [...selectedMovies, movie]);
+    handleUnselectMovie();
+  }
+
+  function handleDeleteFromList(id) {
+    setSelectedMovies(selectedMovies => selectedMovies.filter(m => m.id !== id));
+    handleUnselectMovie();
   }
 
   //useEffect runs at first render
@@ -78,9 +89,15 @@ export default function App() {
           </div>
           <div className="col-md-3">
             <ListContainer>
-              <MyListSummary selectedMovies={selectedMovies} />
-              <MyMovieList selectedMovies={selectedMovies} />
-              {selectedMovie && <MovieDetails selectedMovie={selectedMovie} unSelectMovie={handleUnselectMovie} />}
+
+              {selectedMovie ?  
+              <MovieDetails selectedMovie={selectedMovie} unSelectMovie={handleUnselectMovie} onAddToList={handleAddToList} selectedMovies={selectedMovies} /> : 
+              ( <>
+                <MyListSummary selectedMovies={selectedMovies} />
+                <MyMovieList selectedMovies={selectedMovies} handleDeleteFromList={handleDeleteFromList} />
+                </>
+              )
+              }
             </ListContainer>
           </div>
         </div>
@@ -173,9 +190,18 @@ function MovieList({ movies, onSelectMovie, selectedMovie }) {
   );
 }
 
-function MovieDetails({ selectedMovie, unSelectMovie }) {
+function MovieDetails({ selectedMovie, unSelectMovie, onAddToList, selectedMovies }) {
   const [movie, setMovie] = useState({});
   const [loading, setLoading] = useState(false);
+  const [userRating, setUserRating] = useState(null);
+
+  function handleAddToList() {
+    const newMovie = {
+      ...movie,
+      userRating
+    };
+    onAddToList(newMovie);
+  }
 
   useEffect(function () {
     async function getMovieDetails() {
@@ -213,7 +239,7 @@ function MovieDetails({ selectedMovie, unSelectMovie }) {
               </p>
               <p>
                 <i className="bi bi-star-fill text-warning me-1"></i>
-                <span>{movie.vote_average}</span>
+                <span>{movie.vote_average?.toFixed(2)}</span>
               </p>
             </div>
             <div className="col-12 border-top p-3 mt-3">
@@ -223,6 +249,16 @@ function MovieDetails({ selectedMovie, unSelectMovie }) {
               ))}</p>
             </div>
           </div>
+          {(!selectedMovies.find(m => m.id === movie.id)) ? (
+            <>
+              <div className="mb-4">
+                <StarRating maxRating={10} size={20} onRating={setUserRating} />
+              </div>
+              <button className="btn btn-sm btn-primary me-1" onClick={() => handleAddToList(movie)}>
+                Listeye Ekle
+              </button>
+            </>
+          ) : <p>Listeye Eklendi. Verilen Puan: {selectedMovies.find(m => m.id === movie.id)?.userRating ?? "-"} <i className="bi bi-stars text-warning me-1"></i></p>}
           <button className="btn btn-sm btn-outline-secondary" onClick={unSelectMovie}>
             Kapat
           </button>
@@ -236,7 +272,7 @@ function Movie({ movie, onSelectMovie, selectedMovie }) {
   return (
     <div className="col mb-2">
       <div className={`card movie ${selectedMovie === movie.id && 'selected-movie'}`} onClick={() => onSelectMovie(movie.id)}>
-        <img width="222" height="333" src={movie.poster_path ? `https://media.themoviedb.org/t/p/w440_and_h660_face/${movie.poster_path}` : '/img/no-image.jpg'} alt={movie.Title} className="card-img-top" />
+        <img width="222" height="333" src={movie.poster_path ? `https://media.themoviedb.org/t/p/w440_and_h660_face/${movie.poster_path}` : '/img/no-image.jpg'} alt={movie.title} className="card-img-top" />
         <div className="card-body">
           <h6 className="card-title">{movie.title}</h6>
           <div>
@@ -250,8 +286,9 @@ function Movie({ movie, onSelectMovie, selectedMovie }) {
 }
 
 function MyListSummary({ selectedMovies }) {
-  const avgRating = getAverage(selectedMovies.map((m) => m.rating));
-  const avgDuration = getAverage(selectedMovies.map((m) => m.duration));
+  const avgRating = getAverage(selectedMovies.map((m) => m.vote_average));
+  const avgUserRating = getAverage(selectedMovies.map((m) => m.userRating || 0));
+  const avgDuration = getAverage(selectedMovies.map((m) => m.runtime));
   return (
     <div className="card mb-2">
       <div className="card-body">
@@ -262,8 +299,12 @@ function MyListSummary({ selectedMovies }) {
             <span>{avgRating.toFixed(2)}</span>
           </p>
           <p>
+            <i className="bi bi-stars text-warning me-1"></i>
+            <span>{avgUserRating.toFixed(2)}</span>
+          </p>
+          <p>
             <i className="bi bi-hourglass-split text-warning me-1"></i>
-            <span>{avgDuration} dk</span>
+            <span>{avgDuration.toFixed(2)} dk</span>
           </p>
         </div>
       </div>
@@ -271,36 +312,35 @@ function MyListSummary({ selectedMovies }) {
   );
 }
 
-function MyMovieList({ selectedMovies }) {
+function MyMovieList({ selectedMovies, handleDeleteFromList }) {
   return selectedMovies.map((movie) => (
-    <MyListMovie movie={movie} key={movie.Id} />
+    <MyListMovie movie={movie} key={movie.id} handleDeleteFromList={handleDeleteFromList} />
   ));
 }
 
-function MyListMovie({ movie }) {
+function MyListMovie({ movie, handleDeleteFromList }) {
   return (
     <div className="card mb-2">
       <div className="row">
         <div className="col-4">
-          <img
-            src={movie.Poster}
-            alt={movie.Title}
-            className="img-fluid rounded-start"
-          />
+            <img width="222" height="333" src={movie.poster_path ? `https://media.themoviedb.org/t/p/w440_and_h660_face/${movie.poster_path}` : '/img/no-image.jpg'} alt={movie.Title} className="img-fluid rounded-start" />
         </div>
         <div className="col-8">
           <div className="card-body">
-            <h6 className="card-title">{movie.Title}</h6>
+            <h6 className="card-title">{movie.title}</h6>
             <div className="d-flex justify-content-between">
               <p>
                 <i className="bi bi-star-fill text-warning me-1"></i>
-                <span>{movie.rating}</span>
+                <span>{movie.vote_average?.toFixed(2)}</span>
               </p>
               <p>
                 <i className="bi bi-hourglass text-warning me-1"></i>
-                <span>{movie.duration} dk</span>
+                <span>{movie.runtime} dk</span>
               </p>
             </div>
+            <button className="btn btn-sm btn-danger" onClick={() => handleDeleteFromList(movie.id)}>
+              Listeden Kaldır
+            </button>
           </div>
         </div>
       </div>
