@@ -1,20 +1,23 @@
 import { useState } from "react";
 import Input from "./Input";
 import useInput from "../hooks/useInput";
+import { hasMinLength, isEmail, isNotEmpty } from "../utils/validation";
 
 export default function Login() {
 
   // const [email, setEmail] = useState("");
   // const [password, setPassword] = useState("");
 
-  const {value: emailValue, handleInputChange: handleEmailChange, handleInputBlur: handleEmailBlur, isEdited: emailIsEdited} = useInput("");
-  const {value: passwordValue, handleInputChange: handlePasswordChange, handleInputBlur: handlePasswordBlur, isEdited: passwordIsEdited} = useInput("");
-
-  const emailIsInvalid = emailIsEdited && emailValue !== "" && !emailValue.includes("@");
-  const passwordIsInvalid = passwordIsEdited && passwordValue !== "" && passwordValue.length < 6;
+  const {value: emailValue, handleInputChange: handleEmailChange, handleInputBlur: handleEmailBlur, hasError: emailHasError} = useInput("", (value) => isEmail(value) && isNotEmpty(value));
+  const {value: passwordValue, handleInputChange: handlePasswordChange, handleInputBlur: handlePasswordBlur, hasError: passwordHasError} = useInput("", (value) => hasMinLength(value, 6));
 
   function handleSubmit(e) {
     e.preventDefault();
+
+    if(emailHasError || passwordHasError) {
+      return;
+    }
+
     console.log(emailValue, passwordValue);
   }
 
@@ -31,7 +34,7 @@ export default function Login() {
         name="email"
         id="email"
         labelText="Email"
-        error={emailIsInvalid && "Please enter a valid email address."}
+        error={emailHasError && "Please enter a valid email address."}
         value={emailValue}
         onBlur={handleEmailBlur}
         onChange={handleEmailChange} />
@@ -41,7 +44,7 @@ export default function Login() {
         name="password"
         id="password"
         labelText="Password"
-        error={passwordIsInvalid && "Please enter a valid password (min. 6 characters)."}
+        error={passwordHasError && "Please enter a valid password (min. 6 characters)."}
         value={passwordValue}
         onBlur={handlePasswordBlur}
         onChange={handlePasswordChange} />
