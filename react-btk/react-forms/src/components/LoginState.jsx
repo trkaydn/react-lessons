@@ -1,42 +1,51 @@
 import { useState } from "react";
+import Input from "./Input";
+import useInput from "../hooks/useInput";
 
 export default function Login() {
 
   // const [email, setEmail] = useState("");
   // const [password, setPassword] = useState("");
 
-  const initialValues = { email: "", password: "" };
-  const [values, setValues] = useState(initialValues);
+  const {value: emailValue, handleInputChange: handleEmailChange, handleInputBlur: handleEmailBlur, isEdited: emailIsEdited} = useInput("");
+  const {value: passwordValue, handleInputChange: handlePasswordChange, handleInputBlur: handlePasswordBlur, isEdited: passwordIsEdited} = useInput("");
+
+  const emailIsInvalid = emailIsEdited && emailValue !== "" && !emailValue.includes("@");
+  const passwordIsInvalid = passwordIsEdited && passwordValue !== "" && passwordValue.length < 6;
 
   function handleSubmit(e) {
     e.preventDefault();
-    console.log(values);
+    console.log(emailValue, passwordValue);
   }
 
-  function handleInputChange(e){
-    const name = e.target.name;
-    const value = e.target.value;
-    setValues({ ...values, [name]: value });
-  }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} noValidate>
       <div className="header">
         <h1>Login</h1>
         <p>Please enter your login and password!</p>
       </div>
-      <div className="mb-3">
-        <label htmlFor="email" className="form-label">
-          Email
-        </label>
-        <input type="email" className="form-control" id="email" name="email" value={values.email} onChange={handleInputChange} />
-      </div>
-      <div className="mb-4">
-        <label htmlFor="password" className="form-label">
-          Password
-        </label>
-        <input type="password" className="form-control" id="password" name="password" value={values.password} onChange={handleInputChange} />
-      </div>
+      
+      <Input 
+        type="email" 
+        name="email"
+        id="email"
+        labelText="Email"
+        error={emailIsInvalid && "Please enter a valid email address."}
+        value={emailValue}
+        onBlur={handleEmailBlur}
+        onChange={handleEmailChange} />
+
+      <Input 
+        type="password" 
+        name="password"
+        id="password"
+        labelText="Password"
+        error={passwordIsInvalid && "Please enter a valid password (min. 6 characters)."}
+        value={passwordValue}
+        onBlur={handlePasswordBlur}
+        onChange={handlePasswordChange} />
+
       <div className="mb-3">
         <button className="btn btn-outline-warning me-2">Submit</button>
         <button type="reset" className="btn btn-outline-light">Reset</button>

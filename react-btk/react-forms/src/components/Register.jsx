@@ -1,4 +1,9 @@
+import { useState } from "react";
+
 export default function Register() {
+
+  const [passwordNotEqual, setPasswordNotEqual] = useState(false);
+
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -13,9 +18,15 @@ export default function Register() {
 
     const data = Object.fromEntries(formData.entries());
     data.hobbies = formData.getAll("hobbies");
-    console.log(data);
 
-    e.target.reset();
+    setPasswordNotEqual(data.password !== data.confirmPassword);
+
+    if (!passwordNotEqual) {
+      //submit the form
+      console.log(data);
+      setPasswordNotEqual(false);
+      e.target.reset();
+    }
   }
 
   return (
@@ -25,7 +36,7 @@ export default function Register() {
         <p>Please enter your information!</p>
       </div>
       <div className="mb-3">
-        <label htmlFor="fullName" className="form-label">
+        <label htmlFor="fullName" className="form-label" required>
           Name Surname
         </label>
         <input type="text" className="form-control" id="fullName" name="fullName" />
@@ -41,13 +52,14 @@ export default function Register() {
           <label htmlFor="password" className="form-label">
           Password
           </label>
-        <input type="password" className="form-control" id="password" name="password" />
+        <input type="password" className="form-control" id="password" name="password" required />
         </div>
         <div className="col-6">
-          <label htmlFor="confirmPassword" className="form-label">
+          <label htmlFor="confirmPassword" className="form-label" required>
             Confirm Password
           </label>
           <input type="password" className="form-control" id="confirmPassword" name="confirmPassword" />
+          {passwordNotEqual && <div className="invalid-feedback d-block">Passwords do not match.</div>}
         </div>
         <div className="mb-3 mt-3">
           <label htmlFor="hobbies" className="form-label">
