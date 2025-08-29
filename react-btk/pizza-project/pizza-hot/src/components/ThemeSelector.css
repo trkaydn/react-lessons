@@ -12,3 +12,11 @@
     cursor: pointer;
     margin: 0 5px;
 }
+
+.mode-toggle {
+    margin-right: auto;
+}
+.mode-toggle i{
+    font-size: 1.5rem;
+    cursor: pointer;
+}
