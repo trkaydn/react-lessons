@@ -14,8 +14,8 @@ export function CartContextProvider({ children }) {
 
     }
 
-    function deleteItem() {
-
+    function removeItem(item) {
+        dispatch({ type: "REMOVE_ITEM", item });
     }
 
     function clearAll() {
@@ -24,7 +24,8 @@ export function CartContextProvider({ children }) {
 
     const cartContext = {
         items: cart.items,
-        addItem
+        addItem,
+        removeItem
     };
 
     console.log(cartContext);

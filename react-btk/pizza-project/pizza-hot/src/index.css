@@ -7,8 +7,72 @@
     -webkit-transform: translateY(-10px);
     transform: translateY(-10px);
 }
+
 .item-price {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.modal-box {
+    background-color: #fbfbfb;
+    border-radius: 5px;
+    border : none;
+    box-shadow: 0 0 30px rgba(0, 0, 0, .16);
+    padding : 1rem;
+    width: 80%;
+    max-width: 45rem;
+}
+
+dialog::backdrop {
+    background-color: rgba(0, 0, 0, .5);
+}
+
+dialog[open] {
+    animation: fade-slide-up .3s ease forwards;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap:10px;
+}
+
+.actions button {
+    width: 30px;
+    height: 30px;
+}
+
+.cart-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cart-item p {
+    margin: auto 0;
+}
+
+.cart-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+@keyframes fade-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(4rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

@@ -1,12 +1,12 @@
 export default function cartReducer(state, action) {
+    const index = state.items.findIndex(item => item.id === action.item.id);
+    const existingItem = state.items[index];
+    const updatedItems = [...state.items];
+
     switch (action.type) {
         case "ADD_ITEM":
-            const index = state.items.findIndex(item => item.id === action.item.id);
-            const updatedItems = [...state.items];
 
             if (index > -1) {
-                const existingItem = state.items[index];
-
                 const updatedItem = {
                     ...existingItem,
                     quantity: existingItem.quantity + 1
@@ -19,7 +19,17 @@ export default function cartReducer(state, action) {
             }
             return { ...state, items: updatedItems };
         case "REMOVE_ITEM":
-            break;
+            if(existingItem.quantity === 1){
+                updatedItems.splice(existingItem, 1);
+            } else {
+                  const removedItem = {
+                    ...existingItem,
+                    quantity: existingItem.quantity - 1
+                };
+
+                updatedItems[index] = removedItem;
+            }
+            return { ...state, items: updatedItems };
         default:
             return state;
     }
