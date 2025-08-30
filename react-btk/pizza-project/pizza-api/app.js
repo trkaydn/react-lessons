@@ -4,12 +4,20 @@ const fs = require("fs/promises");
 
 const app = express();
 
+const cors = require("cors");
+
+app.use(cors({
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"]
+}));
+
 app.use(bodyParser.json());
 app.use(express.static("public"));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   next();
 });
@@ -38,7 +46,11 @@ app.post("/orders", async (req, res) => {
     order.customer.address === null ||
     order.customer.address.trim() === "" ||
     order.customer.city === null ||
-    order.customer.city.trim() === ""
+    order.customer.city.trim() === "" ||
+    order.customer.district === null ||
+    order.customer.district.trim() === "" ||
+    order.customer.phone === null ||
+    order.customer.phone.trim() === ""
   ) {
     return res.status(400).json({
       message:

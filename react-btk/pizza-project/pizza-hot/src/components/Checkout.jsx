@@ -2,17 +2,51 @@ import { useContext } from "react";
 import Modal from "./UI/Modal";
 import { UIContext } from "../contexts/UIContext";
 import { CartContext } from "../contexts/CartContext";
+import useFetch from "../hooks/useFetch";
+
+var config = {
+    method: 'POST',
+    headers: { "Content-Type": "application/json" }
+}
 
 export default function Checkout() {
     const { uiProgress, hideCheckout } = useContext(UIContext);
-    const { items } = useContext(CartContext);
+    const { items, clearAll } = useContext(CartContext);
     const totalAmount = items.reduce((total, item) => total + item.price * item.quantity, 0);
+    const {data, isLoading, error, sendRequest } = useFetch("http://localhost:3000/orders", config);
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        
+        const formData = new FormData(event.target);
+        const customerData = Object.fromEntries(formData.entries());
+        
+        sendRequest(JSON.stringify({ order: { items: items, customer: customerData } }))
+    }
+
+    function handleClose() {
+        hideCheckout();
+        clearAll();
+    }
+
+    if(data && !error) {
+        return (
+            <Modal open={uiProgress === "checkout"}>
+                <h2>Ödeme Başarılı</h2>
+                <p>Teşekkür ederiz, siparişiniz alınmıştır.</p>
+                <button className="btn btn-sm btn-danger" onClick={() => handleClose()}>Kapat</button>
+            </Modal>
+        );
+    }
 
     return (
         <Modal open={uiProgress === "checkout"}>
             <h2>Ödeme Yap</h2>
             <p className="text-danger">Sipariş Toplamı: {totalAmount} ₺</p>
-            <form noValidate>
+            <form onSubmit={handleSubmit} noValidate>
+
+                {error && <p className="alert alert-danger">{error}</p>}
+
                 <div className="mb-3">
                     <label htmlFor="name" className="form-label">Ad Soyad:</label>
                     <input type="text" className="form-control" id="name" name="name" />
@@ -52,12 +86,11 @@ export default function Checkout() {
                         </div>
                     </div>
                 </div>
-
+                <div className="d-flex justify-content-end">
+                    <button type="button" className="btn btn-sm btn-danger me-2" onClick={() => hideCheckout()}>Kapat</button>
+                    <button className="btn btn-sm btn-outline-success me-2">Ödeme Yap</button>
+                </div>
             </form>
-            <div className="d-flex justify-content-end">
-                <button className="btn btn-sm btn-danger me-2" onClick={() => hideCheckout()}>Kapat</button>
-                <button className="btn btn-sm btn-outline-success me-2">Ödeme Yap</button>
-            </div>
         </Modal>
     );
 }

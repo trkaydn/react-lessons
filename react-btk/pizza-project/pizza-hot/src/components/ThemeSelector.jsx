@@ -2,7 +2,7 @@ import './ThemeSelector.css';
 import { ThemeContext } from "../contexts/ThemeContext";
 import { useContext } from "react";
 
-const themeColours = ["warning", "danger", "secondary", "primary", "success"];
+const themeColours = ["warning", "danger", "secondary", "primary", "success", "dark"];
 
 export default function ThemeSelector() {
 
