@@ -1,8 +1,8 @@
-import { useLoaderData } from "react-router";
+import { useRouteLoaderData } from "react-router";
 
-export default function CourseDetail() {
+export default function () {
 
-    const course = useLoaderData();
+    const course = useRouteLoaderData("course-details");
 
     return (
         <div className="course-details">
@@ -31,5 +31,11 @@ export default function CourseDetail() {
 export async function courseDetailsLoader({params}) {
     const { courseid } = params;
     const response = await fetch(`http://localhost:5000/courses/${courseid}`);
+    
+    if(!response.ok) {
+        throw new Response("Kurs bulunamadı", {status: 404});
+    }
+
+
     return response.json();
 }
