@@ -1,7 +1,35 @@
-export default function Products(){
+import { useEffect, useState } from "react";
+import ProductList from "../components/ProductList";
+import Loading from "../components/Loading";
+
+export default function Products() {
+
+    const [loadedProducts, setLoadedProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+
+        async function fetchProducts() {
+            try {
+                const response = await fetch("http://localhost:5000/products");
+                const data = await response.json();
+                setLoadedProducts(data);
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchProducts();
+    }, []);
+
+    if (loading) {
+        return <Loading message="Loading products..." />;
+    }
+
     return (
-        <>
-        <h1>Products Page</h1>
-        </>
+        <ProductList products={loadedProducts} />
     );
 }
+

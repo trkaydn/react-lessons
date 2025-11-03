@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router"
-import MainLayout from "./layouts/MainLayout"
+import Main from "./layouts/Main"
 import Home from "./pages/Home"
 import Products from "./pages/Products"
 import Cart from "./pages/Cart"
@@ -10,7 +10,7 @@ import ProductDetails from "./pages/ProductDetails"
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />,
+    element: <Main />,
     children: [
       {
         index: true,
