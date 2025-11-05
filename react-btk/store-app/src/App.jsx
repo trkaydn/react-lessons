@@ -5,9 +5,12 @@ import Products from "./pages/Products"
 import Cart from "./pages/Cart"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
+import ErrorPage from "./pages/errors/Error"
 import ProductDetails from "./pages/ProductDetails"
+import ServerError from "./pages/errors/ServerError"
+import NotFound from "./pages/errors/NotFound"
 
-const router = createBrowserRouter([
+export const router = createBrowserRouter([
   {
     path: "/",
     element: <Main />,
@@ -45,6 +48,27 @@ const router = createBrowserRouter([
         path: "register",
         element: <Register />
       },
+      {
+        path:"error",
+        children: [
+          {
+            index: true,
+            element: <ErrorPage />
+          },
+          {
+            path: "server-error",
+            element: <ServerError />
+          },
+          {
+            path: "not-found",
+            element: <NotFound />
+          }
+        ]
+      },
+      {
+        path: "*",
+        element: <NotFound />
+      }
     ]
   }
 ])

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import ProductItem from "../components/ProductItem";
 import Loading from "../components/Loading";
+import requests from "../api/apiClient";
 
 export default function ProductDetails() {
 
@@ -12,9 +13,8 @@ export default function ProductDetails() {
     useEffect(() => {
         async function fetchProductDetails() {
             try {
-                const response = await fetch(`http://localhost:5000/products/${id}`);
-                const data = await response.json();
-                setProduct(data);
+                const response = await requests.products.details(id);
+                setProduct(response);
             } catch (error) {
                 console.error("Error fetching product details:", error);
             } finally {
@@ -27,6 +27,10 @@ export default function ProductDetails() {
 
     if (loading) {
         return <Loading message="Loading product details..." />;
+    }
+
+    if(!product) {
+        return <div>Product not found</div>;
     }
 
     return (

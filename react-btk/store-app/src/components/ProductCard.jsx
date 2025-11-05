@@ -17,8 +17,8 @@ export default function ProductCard({ product }) {
                     <IconButton>
                         {/* <FavoriteIcon /> */}
                         <FavoriteBorderIcon />
-                        <Button>Sepete Ekle</Button>
                     </IconButton>
+                    <Button>Sepete Ekle</Button>
                 </CardActions>
             </CardActionArea>
         </Card>

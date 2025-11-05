@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ProductList from "../components/ProductList";
 import Loading from "../components/Loading";
+import requests from "../api/apiClient";
 
 export default function Products() {
 
@@ -11,8 +12,7 @@ export default function Products() {
 
         async function fetchProducts() {
             try {
-                const response = await fetch("http://localhost:5000/products");
-                const data = await response.json();
+                const data = await requests.products.list();
                 setLoadedProducts(data);
             } catch (error) {
                 console.error("Error fetching products:", error);

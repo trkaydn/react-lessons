@@ -5,7 +5,8 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 const links = [
     {to: "/", label: "Home"},
-    {to: "/products", label: "Products"}
+    {to: "/products", label: "Products"},
+    {to:"/error", label: "Errors"},
 ];
 
 const authLinks = [
