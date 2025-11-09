@@ -3,25 +3,13 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { Link } from "react-router";
 import { currencyTRY } from "../utils/formats";
-import requests from "../api/apiClient";
-import { useState } from "react";
-import { useCartContext } from "../context/CartContext";
+import { useDispatch, useSelector } from "react-redux";
+import { addItemToCart } from "../pages/cart/cartSlice";
 
 export default function ProductCard({ product }) {
 
-    const [loading, setLoading] = useState(false);
-    const { setCart } = useCartContext();
-
-    function handleAddItem(productId) {
-        setLoading(true);
-        requests.cart.addItem(productId).then((response) => {
-            setCart(response);
-        }).catch((error) => {
-            console.log(error);
-        }).finally(() => {
-            setLoading(false);
-        });
-    }
+    const dispatch = useDispatch();
+    const { status } = useSelector((state) => state.cart);
 
     return (
         <Card>
@@ -37,7 +25,7 @@ export default function ProductCard({ product }) {
                     {/* <FavoriteIcon /> */}
                     <FavoriteBorderIcon />
                 </IconButton>
-                <Button loading={loading} onClick={() => handleAddItem(product.id)}>Sepete Ekle</Button>
+                <Button loading={status === "pendingAddItem" + product.id} onClick={() => dispatch(addItemToCart({ productId: product.id }))}>Sepete Ekle</Button>
             </CardActions>
         </Card>
     );

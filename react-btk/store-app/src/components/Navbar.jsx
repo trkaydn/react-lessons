@@ -3,6 +3,7 @@ import StorefrontIcon from '@mui/icons-material/Storefront';
 import { NavLink } from "react-router";
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useCartContext } from "../context/CartContext";
+import { useSelector } from "react-redux";
 
 const links = [
     {to: "/", label: "Home"},
@@ -16,7 +17,7 @@ const authLinks = [
 ];
 
 export default function Navbar() {
-  const { cart } = useCartContext();
+  const { cart } = useSelector((state) => state.cart);
 
   return (
     <AppBar position="static" sx={{backgroundColor: "secondary.light"}}>

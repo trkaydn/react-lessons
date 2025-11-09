@@ -5,12 +5,12 @@ import { decrement, increment, incrementByValue } from "./counterSlice";
 
 export default function Counter() {
     
-    const count = useSelector((state) => state.counter.value);
+    const { value } = useSelector((state) => state.counter);
     const dispatch = useDispatch();
 
     return (
         <>
-            <Typography>{count}</Typography>
+            <Typography>{value}</Typography>
             <ButtonGroup>
                 <Button onClick={() => dispatch(increment())}>Increment</Button>
                 <Button onClick={() => dispatch(decrement())}>Decrement</Button>

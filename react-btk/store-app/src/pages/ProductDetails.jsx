@@ -4,46 +4,30 @@ import ProductItem from "../components/ProductItem";
 import Loading from "../components/Loading";
 import requests from "../api/apiClient";
 import { useCartContext } from "../context/CartContext";
+import { useDispatch, useSelector } from "react-redux";
+import { addItemToCart, SetCart } from "./cart/cartSlice";
+import { fetchProductById, selectProductById } from "./catalog/catalogSlice";
 
 export default function ProductDetails() {
 
     const { id } = useParams();
-    const [loading, setLoading] = useState(true);
-    const [product, setProduct] = useState(null);
-    const [isAdding, setIsAdding] = useState(false);
-    const { cart, setCart } = useCartContext();
+    const { cart, status } = useSelector((state) => state.cart);
+    const dispatch = useDispatch();
+    const product = useSelector((state) =>selectProductById(state, id));
+    const  {status : loading }  = useSelector((state) => state.catalog);
 
     const cartItem = cart?.cartItems.find((i) => i.product.productId == product?.id);
 
     function handleAddItem(productId) {
-        setIsAdding(true);
-        requests.cart.addItem(productId).then((response) => {
-            setCart(response);
-        })
-            .catch((error) => {
-                console.error("Error adding item to cart:", error);
-            })
-            .finally(() => {
-                setIsAdding(false);
-            });
+        dispatch(addItemToCart({ productId }));
     }
 
     useEffect(() => {
-        async function fetchProductDetails() {
-            try {
-                const response = await requests.products.details(id);
-                setProduct(response);
-            } catch (error) {
-                console.error("Error fetching product details:", error);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        fetchProductDetails();
+        if(!product && id)
+            dispatch(fetchProductById(id));
     }, [id]);
 
-    if (loading) {
+    if (loading === "pendingFetchProductById") {
         return <Loading message="Loading product details..." />;
     }
 
@@ -52,6 +36,6 @@ export default function ProductDetails() {
     }
 
     return (
-        <ProductItem product={product} handleAddItem={handleAddItem} cartItem={cartItem} isAdding={isAdding} />
+        <ProductItem product={product} handleAddItem={handleAddItem} cartItem={cartItem} isAdding={status === "pendingAddItem" + product.id} />
     );
 }
