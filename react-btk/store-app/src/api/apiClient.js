@@ -1,9 +1,24 @@
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import { router } from '../App';
+import axios from "axios";
+import { toast } from "react-toastify";
+import { router } from "../App";
 
 axios.defaults.baseURL = 'http://localhost:5000/';
 axios.defaults.withCredentials = true;
+
+axios.interceptors.request.use((request) => {
+  const userStr = localStorage.getItem("user");
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      if (user?.token) {
+        request.headers.Authorization = `Bearer ${user.token}`;
+      }
+    } catch (error) {
+      console.error("Error parsing user from localStorage:", error);
+    }
+  }
+  return request;
+});
 
 axios.interceptors.response.use(response => {
     return response;
@@ -70,10 +85,17 @@ const cart = {
     deleteItem: (productId, quantity = 1) => methods.delete(`/carts?productId=${productId}&quantity=${quantity}`),
 }
 
+const account = {
+  login: (formData) => methods.post('users/login', formData),
+  register: (formData) => methods.post('users/register', formData),
+  getUser: () => methods.get('users/getUser'),
+}
+
 const requests = {
     products,
     errors,
     cart,
+    account,
 };
 
 export default requests;

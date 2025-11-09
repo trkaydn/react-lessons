@@ -2,8 +2,8 @@ import { AppBar, Toolbar, Box, IconButton, Button, Badge } from "@mui/material";
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import { NavLink } from "react-router";
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { useCartContext } from "../context/CartContext";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../pages/account/accountSlice";
 
 const links = [
     {to: "/", label: "Home"},
@@ -18,6 +18,8 @@ const authLinks = [
 
 export default function Navbar() {
   const { cart } = useSelector((state) => state.cart);
+  const { user } = useSelector((state) => state.account);
+  const dispatch = useDispatch();
 
   return (
     <AppBar position="static" sx={{backgroundColor: "secondary.light"}}>
@@ -39,9 +41,14 @@ export default function Navbar() {
                     <ShoppingCartIcon />
                 </Badge>
             </IconButton>
-            {authLinks.map((link) => (
-                 <Button key={link.to} component={NavLink} to={link.to} color="inherit">{link.label}</Button>
-            ))}
+            {user ? 
+              <>
+              <Button color="inherit">{user.username}</Button>
+              <Button color="inherit" onClick={() => dispatch(logout())}>Çıkış Yap</Button>
+              </>  
+              : authLinks.map((link) => (
+                  <Button key={link.to} component={NavLink} to={link.to} color="inherit">{link.label}</Button>
+              ))}
         </Box>
       </Toolbar>
     </AppBar>

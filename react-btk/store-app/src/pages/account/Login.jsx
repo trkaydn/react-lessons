@@ -1,9 +1,14 @@
 import { LockOutlined } from "@mui/icons-material";
-import { Avatar, Box, Button, Container, Paper, TextField, Typography } from "@mui/material";
+import { Avatar, Box, Button, CircularProgress, Container, Paper, TextField, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { loginUser, setUser } from "./accountSlice";
+import { useSelector } from "react-redux";
 
 export default function Login() {
 
+    const dispatch = useDispatch();
+    const { status } = useSelector((state) => state.account);
     const { register, handleSubmit, formState: { errors, isValid } } = useForm({
         defaultValues: {
             username: "",
@@ -12,7 +17,7 @@ export default function Login() {
     });
 
     function handleFormSubmit(data) {
-        console.log(data);
+        dispatch(loginUser(data));
     }
 
     return (
@@ -28,7 +33,7 @@ export default function Login() {
             <TextField {...register("username", {required: "Kullanıcı adı zorunludur", minLength: { value: 3, message: "Kullanıcı adı en az 3 karakter olmalıdır" }})} label="Kullanıcı Adı" size="small" fullWidth autoFocus sx={{ mb: 2 }} helperText={errors.username?.message} error={!!errors.username} />
             <TextField {...register("password", {required: "Şifre zorunludur", minLength: { value: 6, message: "Şifre en az 6 karakter olmalıdır" }})} type="password" label="Şifre" size="small" fullWidth sx={{ mb: 2 }} helperText={errors.password?.message} error={!!errors.password} />
             <Button type="submit" variant="contained" fullWidth sx={{ mt: 1 }} color="secondary" disabled={!isValid} >
-                Giriş Yap
+                {status === "pending" ? <CircularProgress size={"25px"} /> : "Giriş Yap"}
             </Button>
             </Box>
         </Paper>
