@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import requests from "../../api/apiClient";
+import { Clear } from "@mui/icons-material";
 
 const initialState = {
     cart : null,
@@ -48,6 +49,9 @@ export const cartSlice = createSlice({
     reducers: {
         SetCart(state, action) {
             state.cart = action.payload;
+        },
+        ClearCart(state) {
+            state.cart = null;
         }
     },
     extraReducers: (builder) => {

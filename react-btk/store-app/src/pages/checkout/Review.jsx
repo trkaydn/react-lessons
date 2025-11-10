@@ -3,7 +3,7 @@ import { useFormContext } from "react-hook-form";
 
 export default function Review() {
     const { getValues } = useFormContext();
-    
+
     return (
         <Stack spacing={2} sx={{ mb: 3 }} divider={<Divider />}>
             <Box>

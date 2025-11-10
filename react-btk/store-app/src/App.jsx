@@ -16,6 +16,7 @@ import Main from "./layouts/Main"
 import Loading from "./components/Loading.jsx"
 import Checkout from "./pages/checkout/checkout.jsx"
 import AuthGuard from "./auth/AuthGuard.jsx"
+import Orders from "./pages/orders/Orders.jsx"
 
 export const router = createBrowserRouter([
   {
@@ -27,7 +28,7 @@ export const router = createBrowserRouter([
         element: <Home />
       },
       {
-        path:"home",
+        path: "home",
         element: <Home />
       },
       {
@@ -58,14 +59,18 @@ export const router = createBrowserRouter([
       {
         element: <AuthGuard />,
         children: [
-                {
-                  path: "checkout",
-                  element: <Checkout />
-                },
+          {
+            path: "checkout",
+            element: <Checkout />
+          },
+          {
+            path: "orders",
+            element: <Orders />
+          }
         ]
       },
       {
-        path:"error",
+        path: "error",
         children: [
           {
             index: true,
@@ -93,7 +98,7 @@ function App() {
 
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
-  
+
   const initApp = async () => {
     await dispatch(getUser());
     await dispatch(getCart());
@@ -103,7 +108,7 @@ function App() {
     initApp().then(() => setLoading(false));
   }, [])
 
-  if (loading) 
+  if (loading)
     return <Loading message="Uygulama Başlatılıyor..." />;
 
   return (
