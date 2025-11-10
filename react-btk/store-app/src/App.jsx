@@ -14,6 +14,8 @@ import { getUser } from "./pages/account/accountSlice.js"
 import { useDispatch } from "react-redux"
 import Main from "./layouts/Main"
 import Loading from "./components/Loading.jsx"
+import Checkout from "./pages/checkout/checkout.jsx"
+import AuthGuard from "./auth/AuthGuard.jsx"
 
 export const router = createBrowserRouter([
   {
@@ -52,6 +54,15 @@ export const router = createBrowserRouter([
       {
         path: "register",
         element: <Register />
+      },
+      {
+        element: <AuthGuard />,
+        children: [
+                {
+                  path: "checkout",
+                  element: <Checkout />
+                },
+        ]
       },
       {
         path:"error",
