@@ -1,6 +1,30 @@
+import { Card, Grid, CardMedia, Box, Typography, CardContent } from "@mui/material"
+
 export default async function BlogDetail({ params }) {
-    const id = (await params).id
+    const { id } = await params;
+    const res = await fetch("http://localhost:3000/api/blog/" + id);
+    const blog = await res.json();
+
     return (
-        <h1>Blog id: {id}</h1>
+        <Grid container>
+            <Card sx={{ display: "flex" }}>
+                <CardMedia
+                    component="img"
+                    sx={{ width: "45%" }}
+                    image={`/img/${blog.img}`}
+                    alt=""
+                ></CardMedia>
+                <Box>
+                    <CardContent>
+                        <Typography component="div" variant="h6">
+                            {blog.name}
+                        </Typography>
+                        <Typography component="div" variant="subtitle1">
+                            {blog.description}
+                        </Typography>
+                    </CardContent>
+                </Box>
+            </Card>
+        </Grid>
     );
 }
